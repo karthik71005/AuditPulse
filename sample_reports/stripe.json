@@ -1,0 +1,82 @@
+{
+  "url": "https://stripe.com",
+  "title": "Stripe | Financial Infrastructure to Grow Your Revenue",
+  "description": "Stripe is a financial services platform that helps all types of businesses accept payments, build flexible billing models, and manage money movement.",
+  "overall_score": 50,
+  "is_high_authority": false,
+  "scoring_notes": [],
+  "breakdown": {
+    "crawlability": {
+      "score": 30,
+      "max": 30
+    },
+    "schema": {
+      "score": 10,
+      "max": 30
+    },
+    "content_density": {
+      "score": 10,
+      "max": 10
+    },
+    "citations": {
+      "score": 0,
+      "max": 30
+    }
+  },
+  "buyer_queries_tested": [
+    {
+      "query": "How does Stripe's payment processing work for e-commerce businesses",
+      "cited": false
+    },
+    {
+      "query": "What are the fees associated with using Stripe for online transactions",
+      "cited": false
+    },
+    {
+      "query": "Can I use Stripe to manage recurring subscriptions and invoices for my software company",
+      "cited": false
+    }
+  ],
+  "citation_hits": 0,
+  "findings": [
+    {
+      "check_id": "citation_gap",
+      "status": "WARN",
+      "title": "Zero Citation Share in AI-Related Web Search",
+      "impact": "HIGH",
+      "effort": "MEDIUM",
+      "evidence": "Domain appeared in 0 out of 3 buyer-intent queries tested via web search.",
+      "description": "Publish Q&A structured FAQ content and claim brand listings on third-party aggregators (G2, Reddit, ProductHunt). AI engines heavily weight sources that appear in web search.",
+      "copy_paste_code": "<!-- Priority Buyer Queries to Target -->\n<!-- How does Stripe's payment processing work for e-commerce businesses -->\n<!-- What are the fees associated with using Stripe for online transactions -->\n<!-- Can I use Stripe to manage recurring subscriptions and invoices for my software company -->",
+      "ai_insight": "For Stripe, a leader in financial infrastructure, having zero citation share in AI-related web search matters because it may hinder the company's ability to attract new customers who increasingly rely on AI-driven search results to discover and evaluate payment solutions. As a result, Stripe may miss out on potential revenue growth opportunities if its brand and services are not prominently featured in AI-influenced search queries."
+    }
+  ],
+  "ai_narrative": "Your AI search visibility score is 50, which means Stripe's website is moderately visible to AI-powered search engines. In plain terms, this score indicates that while your website can be found by AI search engines, there's room for improvement to increase its visibility and reach a wider audience. The single most critical gap is the lack of citations, scoring 0 out of 30, which refers to mentions of your business on other reputable websites, a key factor in establishing credibility and trust with AI search engines.\n\nThis gap is critical because citations help AI search engines understand your business's reputation and authority in the financial services industry. Without citations, your website may struggle to stand out from competitors and may not be displayed in search results as prominently. \n\nThis week, prioritize reaching out to relevant financial industry partners or publications to request mentions of Stripe on their websites, which can help improve your citation score and overall AI search visibility.",
+  "scrape_warning": "",
+  "checks": {
+    "crawlability": {
+      "gptbot_blocked": false,
+      "perplexity_blocked": false,
+      "has_llms_txt": true,
+      "llms_txt_valid": true,
+      "robots_found": true,
+      "details": []
+    },
+    "schema": {
+      "total_schemas": 1,
+      "detected_types": [
+        "WebSite",
+        "Organization"
+      ],
+      "has_organization": true,
+      "has_product_or_service": false,
+      "has_faq": false
+    },
+    "content": {
+      "total_headings": 32,
+      "question_headings": 2,
+      "has_tables_or_lists": true,
+      "answer_density_pass": true
+    }
+  }
+}

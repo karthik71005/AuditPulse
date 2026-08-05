@@ -1,0 +1,79 @@
+{
+  "url": "https://linear.app",
+  "title": "linear.app",
+  "description": "",
+  "overall_score": 40,
+  "is_high_authority": false,
+  "scoring_notes": [],
+  "breakdown": {
+    "crawlability": {
+      "score": 30,
+      "max": 30
+    },
+    "schema": {
+      "score": 0,
+      "max": 30
+    },
+    "content_density": {
+      "score": 0,
+      "max": 10
+    },
+    "citations": {
+      "score": 10,
+      "max": 30
+    }
+  },
+  "buyer_queries_tested": [
+    {
+      "query": "What is Linear App and how does it help with project management",
+      "cited": false
+    },
+    {
+      "query": "Linear app features and pricing plans",
+      "cited": true
+    },
+    {
+      "query": "Is Linear App suitable for agile software development teams",
+      "cited": false
+    }
+  ],
+  "citation_hits": 1,
+  "findings": [
+    {
+      "check_id": "missing_org_schema",
+      "status": "FAIL",
+      "title": "Missing Organization JSON-LD Schema",
+      "impact": "HIGH",
+      "effort": "LOW",
+      "evidence": "No <script type='application/ld+json'> with @type 'Organization' was detected.",
+      "description": "Inject this JSON-LD schema into your page head so LLMs can verify your brand identity, name, and URL with certainty. Even well-known brands benefit from explicit schema \u2014 it removes any ambiguity when AI engines attribute information.",
+      "copy_paste_code": "<script type=\"application/ld+json\">\n{\n  \"@context\": \"https://schema.org\",\n  \"@type\": \"Organization\",\n  \"name\": \"linear.app\",\n  \"url\": \"https://linear.app\"\n}\n</script>",
+      "ai_insight": "For linear.app, a project management platform, having a clear and verifiable brand identity is crucial as it expands its user base and integrates with other tools, relying on accurate representation by AI engines. By addressing the missing Organization JSON-LD schema, linear.app can ensure its brand information is consistently and accurately attributed across the web, supporting its growth and reputation."
+    }
+  ],
+  "ai_narrative": "Your AI search visibility score is 40, which means your website, linear.app, is not well-optimized for search engines to understand and display its content effectively. In simple terms, this score indicates that your website is not easily found or understood by search engines, making it harder for potential customers to discover your business. The most critical gap is the lack of schema (a way to help search engines understand your website's content) and content density (the amount of useful and relevant content on your website), both of which are currently scored at 0.\n\nThis gap is critical because search engines rely on schema and content density to determine the relevance and usefulness of your website. Without these, your website is essentially invisible to search engines. The fact that your website has a good crawlability score (30/30) means that search engines can access and read your website's content, but they don't have enough information to understand what it's about.\n\nThis week, you should prioritize adding schema to your website, specifically organization and product schema, to help search engines understand your business and what you offer. This will involve working with your web developer to add specific code to your website that provides search engines with the necessary information to display your content effectively.",
+  "scrape_warning": "",
+  "checks": {
+    "crawlability": {
+      "gptbot_blocked": false,
+      "perplexity_blocked": false,
+      "has_llms_txt": true,
+      "llms_txt_valid": true,
+      "robots_found": true,
+      "details": []
+    },
+    "schema": {
+      "total_schemas": 0,
+      "detected_types": [],
+      "has_organization": false,
+      "has_product_or_service": false,
+      "has_faq": false
+    },
+    "content": {
+      "total_headings": 0,
+      "question_headings": 0,
+      "has_tables_or_lists": false,
+      "answer_density_pass": false
+    }
+  }
+}

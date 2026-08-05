@@ -139,6 +139,19 @@ Rather than measuring generic SEO metrics (like page speed or meta tag length), 
 
 ---
 
+### 🛡️ Why We Skipped Other Checks (Defense of Scope)
+
+Following the rule **"Go deep, not wide — 3 checks done properly beat 12 that tick boxes"**, we deliberately excluded several common candidate checks:
+
+| Candidate Check | Why We Skipped It |
+|---|---|
+| **Core Web Vitals / Page Speed** | Page rendering speed is a traditional Google Search ranking factor. LLM crawlers parse text payloads asynchronously and do not execute browser layout engines. Page speed has 0 proven impact on AI citation. |
+| **Ahrefs / Moz Backlink Quantity** | Requires expensive commercial APIs ($99+/mo) and measures traditional link equity. RAG (Retrieval-Augmented Generation) systems select sources based on semantic relevance and schema clarity, not raw backlink volume. |
+| **Keyword Density Analysis** | Search-augmented LLMs operate on vector embeddings and semantic context rather than exact-match keyword repetition. Auditing keyword density produces outdated advice that hurts LLM readability. |
+| **Brand Sentiment Scoring** | Basic sentiment classification models frequently misread nuanced business reviews, producing unreliable findings that confuse business owners. |
+
+---
+
 ## 🧪 What Is Real vs. Mocked
 
 * **Live Web Scraping**: **REAL** (Uses `httpx` with randomized browser User-Agents and fallback retry logic).
