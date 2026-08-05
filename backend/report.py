@@ -1,6 +1,9 @@
 from urllib.parse import urlparse
 
-from backend.scorer import _is_high_authority
+try:
+    from backend.scorer import _is_high_authority
+except ModuleNotFoundError:
+    from scorer import _is_high_authority
 
 
 def generate_actionable_report(
@@ -151,8 +154,6 @@ def generate_actionable_report(
         )
 
     # ── Finding 4: Citation Visibility Gap ──────────────────────────────
-    # For high-authority sites that scored 0 DDG hits, the scorer already
-    # awarded partial credit. Don't add a FAIL finding — just skip it.
     if citation_hits == 0 and not high_authority:
         findings.append(
             {

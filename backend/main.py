@@ -7,19 +7,34 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
-from backend.ai_analyst import (
-    enrich_findings_with_ai,
-    generate_buyer_queries,
-    generate_geo_narrative,
-)
-from backend.checks import (
-    check_content_structure,
-    check_crawlability,
-    check_structured_schema,
-)
-from backend.crawler import scrape_target_site
-from backend.report import generate_actionable_report
-from backend.scorer import calculate_geo_score
+try:
+    from backend.ai_analyst import (
+        enrich_findings_with_ai,
+        generate_buyer_queries,
+        generate_geo_narrative,
+    )
+    from backend.checks import (
+        check_content_structure,
+        check_crawlability,
+        check_structured_schema,
+    )
+    from backend.crawler import scrape_target_site
+    from backend.report import generate_actionable_report
+    from backend.scorer import calculate_geo_score
+except ModuleNotFoundError:
+    from ai_analyst import (
+        enrich_findings_with_ai,
+        generate_buyer_queries,
+        generate_geo_narrative,
+    )
+    from checks import (
+        check_content_structure,
+        check_crawlability,
+        check_structured_schema,
+    )
+    from crawler import scrape_target_site
+    from report import generate_actionable_report
+    from scorer import calculate_geo_score
 
 load_dotenv()
 
