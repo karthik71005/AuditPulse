@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEO Audit — {{ report.title }}</title>
+  <meta name="description" content="GEO Auditor report for {{ report.url }} — AI search visibility score: {{ report.overall_score }}/100" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ── Reset & tokens ─────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:        #080c14;
+      --surface:   #0e1521;
+      --surface2:  #131d2e;
+      --border:    #1e2d45;
+      --border2:   #263650;
+      --text:      #e8edf5;
+      --muted:     #6b7f99;
+      --accent:    #4f8ef7;
+      --accent2:   #7c3aed;
+      --green:     #10d47e;
+      --yellow:    #f59e0b;
+      --red:       #ef4444;
+      --radius:    14px;
+      --radius-sm: 8px;
+    }
+
+    html { font-family: 'Inter', system-ui, sans-serif; font-size: 16px; color: var(--text); background: var(--bg); }
+    body { min-height: 100vh; padding: 0; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ── Layout ─────────────────────────────────────────────────────── */
+    .page-wrap { max-width: 900px; margin: 0 auto; padding: 40px 24px 80px; }
+
+    /* ── Topbar ─────────────────────────────────────────────────────── */
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px; border-bottom: 1px solid var(--border);
+      background: var(--surface); position: sticky; top: 0; z-index: 100;
+      backdrop-filter: blur(8px);
+    }
+    .topbar-logo { font-size: 15px; font-weight: 800; letter-spacing: -.3px; color: var(--text); }
+    .topbar-logo span { color: var(--accent); }
+    .topbar-back {
+      font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 6px;
+      transition: color .2s;
+    }
+    .topbar-back:hover { color: var(--text); text-decoration: none; }
+
+    /* ── Hero ───────────────────────────────────────────────────────── */
+    .hero {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 32px; padding: 40px 0 32px; flex-wrap: wrap;
+    }
+    .hero-left { flex: 1; min-width: 240px; }
+    .hero-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 12px;
+    }
+    .hero-title { font-size: 28px; font-weight: 800; line-height: 1.2; margin-bottom: 8px; }
+    .hero-url { font-size: 13px; color: var(--muted); word-break: break-all; }
+    .hero-url a { color: var(--muted); }
+    .hero-url a:hover { color: var(--accent); }
+
+    /* Score ring */
+    .score-ring-wrap { display: flex; flex-direction: column; align-items: center; gap: 12px; flex-shrink: 0; }
+    .score-ring { position: relative; width: 140px; height: 140px; }
+    .score-ring svg { transform: rotate(-90deg); }
+    .score-ring-bg { fill: none; stroke: var(--border); stroke-width: 10; }
+    .score-ring-fill {
+      fill: none; stroke-width: 10; stroke-linecap: round;
+      transition: stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);
+    }
+    .score-ring-text {
+      position: absolute; inset: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+    }
+    .score-number { font-size: 36px; font-weight: 900; line-height: 1; }
+    .score-denom { font-size: 13px; color: var(--muted); font-weight: 500; }
+    .verdict-badge {
+      font-size: 12px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase;
+      padding: 5px 14px; border-radius: 999px; border: 1px solid;
+    }
+
+    /* ── AI Narrative card ─────────────────────────────────────────── */
+    .narrative-card {
+      background: linear-gradient(135deg, #0e1a2f 0%, #131d2e 100%);
+      border: 1px solid var(--border2); border-radius: var(--radius);
+      padding: 28px 32px; margin-bottom: 32px; position: relative; overflow: hidden;
+    }
+    .narrative-card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    .narrative-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase;
+      color: var(--accent); display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .narrative-label-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .narrative-text { font-size: 15px; line-height: 1.75; color: #c8d6ea; }
+
+    /* ── Section headers ────────────────────────────────────────────── */
+    .section { margin-bottom: 40px; }
+    .section-title {
+      font-size: 13px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 16px; display: flex; align-items: center; gap: 10px;
+    }
+    .section-title::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+    /* ── Score breakdown grid ───────────────────────────────────────── */
+    .breakdown-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; }
+    .breakdown-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 22px; transition: border-color .2s, transform .2s;
+    }
+    .breakdown-card:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .breakdown-card-label { font-size: 11px; font-weight: 600; letter-spacing: .8px; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+    .breakdown-card-score { font-size: 26px; font-weight: 800; line-height: 1; }
+    .breakdown-card-max { font-size: 14px; color: var(--muted); font-weight: 400; }
+    .breakdown-bar-wrap { margin-top: 10px; height: 4px; background: var(--border); border-radius: 2px; overflow: hidden; }
+    .breakdown-bar { height: 100%; border-radius: 2px; transition: width 1s ease; }
+
+    /* ── Queries tested ─────────────────────────────────────────────── */
+    .query-list { display: flex; flex-direction: column; gap: 10px; }
+    .query-row {
+      display: flex; align-items: center; gap: 14px;
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px 18px;
+    }
+    .query-icon { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+    .query-icon.hit { background: rgba(16,212,126,.12); color: var(--green); border: 1px solid rgba(16,212,126,.3); }
+    .query-icon.miss { background: rgba(239,68,68,.1); color: var(--red); border: 1px solid rgba(239,68,68,.25); }
+    .query-text { font-size: 14px; color: var(--text); flex: 1; }
+    .query-badge { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 999px; flex-shrink: 0; }
+    .query-badge.hit { background: rgba(16,212,126,.12); color: var(--green); border: 1px solid rgba(16,212,126,.25); }
+    .query-badge.miss { background: rgba(239,68,68,.08); color: var(--red); border: 1px solid rgba(239,68,68,.2); }
+
+    /* ── Finding cards ──────────────────────────────────────────────── */
+    .finding-list { display: flex; flex-direction: column; gap: 18px; }
+    .finding-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      overflow: hidden; transition: border-color .2s;
+    }
+    .finding-card:hover { border-color: var(--border2); }
+    .finding-header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px; padding: 22px 24px 18px; flex-wrap: wrap;
+    }
+    .finding-title { font-size: 16px; font-weight: 700; flex: 1; }
+    .finding-badges { display: flex; gap: 8px; flex-shrink: 0; }
+    .badge {
+      font-size: 10px; font-weight: 700; letter-spacing: .7px; text-transform: uppercase;
+      padding: 4px 10px; border-radius: 999px; border: 1px solid;
+    }
+    .badge-impact-HIGH { color: #fca5a5; background: rgba(239,68,68,.1); border-color: rgba(239,68,68,.3); }
+    .badge-impact-MEDIUM { color: #fcd34d; background: rgba(245,158,11,.1); border-color: rgba(245,158,11,.3); }
+    .badge-impact-LOW { color: #86efac; background: rgba(16,212,126,.1); border-color: rgba(16,212,126,.25); }
+    .badge-status-FAIL { color: #fca5a5; background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); }
+    .badge-status-WARN { color: #fcd34d; background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.2); }
+    .badge-status-INFO { color: #93c5fd; background: rgba(59,130,246,.08); border-color: rgba(59,130,246,.2); }
+    .badge-effort-LOW { color: #a5b4fc; background: rgba(99,102,241,.1); border-color: rgba(99,102,241,.3); }
+    .badge-effort-MEDIUM { color: #fcd34d; background: rgba(245,158,11,.08); border-color: rgba(245,158,11,.25); }
+    .badge-effort-HIGH { color: #fca5a5; background: rgba(239,68,68,.08); border-color: rgba(239,68,68,.2); }
+
+    .finding-body { padding: 0 24px 22px; display: flex; flex-direction: column; gap: 14px; }
+    .finding-section-label { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+    .finding-evidence {
+      background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 12px 16px; font-size: 13px; color: #a8b9d0; line-height: 1.6;
+    }
+    .finding-desc { font-size: 14px; color: #9ab0cc; line-height: 1.65; }
+    .finding-ai-insight {
+      background: linear-gradient(135deg, #0b1528 0%, #111c2e 100%);
+      border: 1px solid #1e3050; border-radius: var(--radius-sm); padding: 14px 16px;
+      font-size: 13.5px; color: #b8d0ef; line-height: 1.65;
+    }
+    .finding-ai-insight-label {
+      font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .ai-chip {
+      display: inline-flex; align-items: center; gap: 4px; font-size: 9px; font-weight: 700;
+      letter-spacing: .6px; text-transform: uppercase; padding: 2px 7px; border-radius: 999px;
+      background: rgba(79,142,247,.12); color: var(--accent); border: 1px solid rgba(79,142,247,.25);
+    }
+
+    /* Code block */
+    .code-block-wrap { display: flex; flex-direction: column; gap: 6px; }
+    .code-block-header {
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-block {
+      background: #04080f; border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 16px 18px; font-family: 'Menlo', 'Monaco', 'Consolas', monospace;
+      font-size: 12px; color: #7dd3a8; line-height: 1.6; overflow-x: auto;
+      white-space: pre-wrap; word-break: break-word;
+    }
+    .copy-btn {
+      font-size: 11px; font-weight: 600; padding: 5px 12px; border-radius: 6px;
+      background: rgba(79,142,247,.12); color: var(--accent); border: 1px solid rgba(79,142,247,.25);
+      cursor: pointer; transition: background .15s, color .15s;
+    }
+    .copy-btn:hover { background: rgba(79,142,247,.25); }
+    .copy-btn.copied { color: var(--green); background: rgba(16,212,126,.1); border-color: rgba(16,212,126,.25); }
+
+    /* ── Monday morning box ─────────────────────────────────────────── */
+    .monday-box {
+      background: linear-gradient(135deg, #0a1520 0%, #0f1d30 100%);
+      border: 1px solid var(--border2); border-radius: var(--radius); padding: 28px 32px;
+      margin-top: 40px;
+    }
+    .monday-box h2 {
+      font-size: 18px; font-weight: 800; margin-bottom: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .monday-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .monday-list { display: flex; flex-direction: column; gap: 12px; }
+    .monday-item {
+      display: flex; align-items: flex-start; gap: 14px;
+      padding: 14px 18px; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+    }
+    .monday-num {
+      width: 28px; height: 28px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; font-weight: 800; color: #fff; flex-shrink: 0;
+    }
+    .monday-text { font-size: 14px; color: var(--text); line-height: 1.5; }
+
+    /* ── Footer ─────────────────────────────────────────────────────── */
+    .footer {
+      margin-top: 60px; padding-top: 24px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-left { font-size: 12px; color: var(--muted); }
+    .footer-right { font-size: 12px; color: var(--muted); }
+    .footer-right a { color: var(--muted); }
+    .footer-right a:hover { color: var(--accent); }
+  </style>
+</head>
+<body>
+
+<!-- Topbar -->
+<nav class="topbar">
+  <span class="topbar-logo">GEO<span>Auditor</span></span>
+  <a href="/" class="topbar-back" id="back-link">
+    ← Run another audit
+  </a>
+</nav>
+
+<div class="page-wrap">
+
+  <!-- ── Hero ──────────────────────────────────────────────────────── -->
+  <div class="hero">
+    <div class="hero-left">
+      <p class="hero-eyebrow">AI Search Visibility Report</p>
+      <h1 class="hero-title">{{ report.title }}</h1>
+      <p class="hero-url"><a href="{{ report.url }}" target="_blank" rel="noopener">{{ report.url }}</a></p>
+    </div>
+
+    <!-- Animated score ring -->
+    {% set score = report.overall_score %}
+    {% set circumference = 345 %}
+    {% set filled = ((score / 100) * circumference) | int %}
+    {% if score >= 70 %}
+      {% set ring_color = '#10d47e' %}
+      {% set verdict = 'VISIBLE' %}
+      {% set verdict_color = '#10d47e' %}
+      {% set verdict_bg = 'rgba(16,212,126,.12)' %}
+      {% set verdict_border = 'rgba(16,212,126,.3)' %}
+    {% elif score >= 45 %}
+      {% set ring_color = '#f59e0b' %}
+      {% set verdict = 'WEAK' %}
+      {% set verdict_color = '#f59e0b' %}
+      {% set verdict_bg = 'rgba(245,158,11,.1)' %}
+      {% set verdict_border = 'rgba(245,158,11,.3)' %}
+    {% else %}
+      {% set ring_color = '#ef4444' %}
+      {% set verdict = 'INVISIBLE' %}
+      {% set verdict_color = '#ef4444' %}
+      {% set verdict_bg = 'rgba(239,68,68,.1)' %}
+      {% set verdict_border = 'rgba(239,68,68,.3)' %}
+    {% endif %}
+
+    <div class="score-ring-wrap">
+      <div class="score-ring" id="score-ring" data-score="{{ score }}" data-circumference="{{ circumference }}">
+        <svg width="140" height="140" viewBox="0 0 140 140">
+          <circle class="score-ring-bg" cx="70" cy="70" r="55" />
+          <circle class="score-ring-fill" id="ring-fill"
+            cx="70" cy="70" r="55"
+            stroke="{{ ring_color }}"
+            stroke-dasharray="{{ circumference }}"
+            stroke-dashoffset="{{ circumference - filled }}" />
+        </svg>
+        <div class="score-ring-text">
+          <span class="score-number" style="color: {{ ring_color }}">{{ score }}</span>
+          <span class="score-denom">/100</span>
+        </div>
+      </div>
+      <span class="verdict-badge" style="color:{{ verdict_color }}; background:{{ verdict_bg }}; border-color:{{ verdict_border }}">
+        {{ verdict }}
+      </span>
+    </div>
+  </div>
+
+
+  <!-- ── Scrape Warning (403 / partial audit) ──────────────────────────── -->
+  {% if report.scrape_warning %}
+  <div style="background: rgba(245,158,11,.07); border: 1px solid rgba(245,158,11,.25); border-radius: 12px; padding: 18px 24px; margin-bottom: 24px; display:flex; align-items:flex-start; gap:16px;">
+    <span style="font-size:20px; flex-shrink:0;">⚠️</span>
+    <div>
+      <p style="font-size:13px; font-weight:700; color:#f59e0b; margin-bottom:4px;">Partial Audit — Site Blocked Scraping</p>
+      <p style="font-size:13px; color:#a89060; line-height:1.6;">{{ report.scrape_warning }}</p>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── High Authority Notice ─────────────────────────────────────────── -->
+  {% if report.is_high_authority %}
+  <div style="background: rgba(16,212,126,.06); border: 1px solid rgba(16,212,126,.2); border-radius: 12px; padding: 18px 24px; margin-bottom: 28px; display:flex; align-items:flex-start; gap:16px;">
+    <span style="font-size:22px; flex-shrink:0;">🏆</span>
+    <div>
+      <p style="font-size:13px; font-weight:700; color:#10d47e; margin-bottom:4px;">High-Authority Platform Detected</p>
+      <p style="font-size:13px; color:#8abfa3; line-height:1.6;">
+        This domain has established AI citation authority — AI engines like ChatGPT and Perplexity cite it
+        extensively from training data, regardless of technical GEO setup. The score below reflects
+        <strong style="color:#c8d6ea">technical optimization opportunities</strong>, not actual AI visibility
+        (which is likely much higher for this domain).
+      </p>
+    </div>
+  </div>
+  {% endif %}
+
+
+  <!-- ── AI Narrative ───────────────────────────────────────────────── -->
+  {% if report.ai_narrative %}
+  <div class="narrative-card">
+    <div class="narrative-label">
+      <span class="narrative-label-dot"></span>
+      AI Analysis
+      <span class="ai-chip">✦ Groq · llama-3.3-70b</span>
+    </div>
+    <p class="narrative-text">{{ report.ai_narrative }}</p>
+  </div>
+  {% endif %}
+
+  <!-- ── Score Breakdown ───────────────────────────────────────────── -->
+  <div class="section">
+    <h2 class="section-title">Score Breakdown</h2>
+    <div class="breakdown-grid">
+      {% for key, val in report.breakdown.items() %}
+      {% set pct = ((val.score / val.max) * 100) | int %}
+      {% if pct >= 70 %}{% set bar_color = '#10d47e' %}
+      {% elif pct >= 40 %}{% set bar_color = '#f59e0b' %}
+      {% else %}{% set bar_color = '#ef4444' %}{% endif %}
+      <div class="breakdown-card">
+        <div class="breakdown-card-label">{{ key | replace('_', ' ') }}</div>
+        <div>
+          <span class="breakdown-card-score" style="color:{{ bar_color }}">{{ val.score }}</span>
+          <span class="breakdown-card-max"> / {{ val.max }}</span>
+        </div>
+        <div class="breakdown-bar-wrap">
+          <div class="breakdown-bar" style="width:{{ pct }}%; background:{{ bar_color }}"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <!-- Scoring notes (only shown when present) -->
+    {% if report.scoring_notes %}
+    <div style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+      {% for note in report.scoring_notes %}
+      <div style="background: rgba(79,142,247,.06); border: 1px solid rgba(79,142,247,.15); border-radius:8px; padding:10px 14px; font-size:12px; color:#7a9abf; line-height:1.55;">
+        <span style="color:var(--accent); font-weight:700;">ℹ Note: </span>{{ note }}
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Buyer Queries Tested ───────────────────────────────────────── -->
+  <div class="section">
+    <h2 class="section-title">AI Buyer Queries Tested</h2>
+    <div class="query-list">
+      {% for item in report.buyer_queries_tested %}
+      <div class="query-row">
+        {% if item.cited %}
+        <div class="query-icon hit">✓</div>
+        {% else %}
+        <div class="query-icon miss">✗</div>
+        {% endif %}
+        <span class="query-text">"{{ item.query }}"</span>
+        {% if item.cited %}
+        <span class="query-badge hit">CITED</span>
+        {% else %}
+        <span class="query-badge miss">NOT FOUND</span>
+        {% endif %}
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- ── Findings ──────────────────────────────────────────────────── -->
+  <div class="section">
+    <h2 class="section-title">Prioritized Findings</h2>
+    {% if report.findings %}
+    <div class="finding-list">
+      {% for item in report.findings %}
+      <div class="finding-card">
+        <div class="finding-header">
+          <h3 class="finding-title">{{ item.title }}</h3>
+          <div class="finding-badges">
+            <span class="badge badge-impact-{{ item.impact }}">Impact {{ item.impact }}</span>
+            <span class="badge badge-effort-{{ item.effort }}">Effort {{ item.effort }}</span>
+          </div>
+        </div>
+
+        <div class="finding-body">
+          <!-- Evidence -->
+          <div>
+            <div class="finding-section-label">Evidence</div>
+            <div class="finding-evidence">{{ item.evidence }}</div>
+          </div>
+
+          <!-- What to do -->
+          <div>
+            <div class="finding-section-label">What to Fix</div>
+            <p class="finding-desc">{{ item.description }}</p>
+          </div>
+
+          <!-- AI insight -->
+          {% if item.ai_insight %}
+          <div class="finding-ai-insight">
+            <div class="finding-ai-insight-label">
+              <span class="ai-chip">✦ AI Insight</span>
+            </div>
+            {{ item.ai_insight }}
+          </div>
+          {% endif %}
+
+          <!-- Copy-paste fix -->
+          {% if item.copy_paste_code %}
+          <div class="code-block-wrap">
+            <div class="code-block-header">
+              <div class="finding-section-label" style="margin:0">Copy-Paste Fix</div>
+              <button class="copy-btn" id="copy-{{ loop.index }}" onclick="copyCode(this, 'code-{{ loop.index }}')">Copy</button>
+            </div>
+            <pre class="code-block" id="code-{{ loop.index }}">{{ item.copy_paste_code }}</pre>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align:center; padding: 40px; color: var(--muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);">
+      <p style="font-size:32px; margin-bottom:12px">🎉</p>
+      <p style="font-size:16px; font-weight:600; color: var(--green); margin-bottom:6px">No critical issues found</p>
+      <p style="font-size:14px">This site passed all checked GEO criteria.</p>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- ── Monday Morning Box ────────────────────────────────────────── -->
+  {% if report.findings %}
+  <div class="monday-box">
+    <h2>What to do Monday morning</h2>
+    <p>Start with these — highest impact, lowest effort first.</p>
+    <div class="monday-list">
+      {% set high_items = [] %}
+      {% for item in report.findings %}
+        {% if item.impact == 'HIGH' and item.effort == 'LOW' %}{% set _ = high_items.append(item) %}{% endif %}
+      {% endfor %}
+      {% for item in report.findings %}
+        {% if item.impact == 'HIGH' and item.effort != 'LOW' %}{% set _ = high_items.append(item) %}{% endif %}
+      {% endfor %}
+      {% for item in report.findings %}
+        {% if item.impact != 'HIGH' %}{% set _ = high_items.append(item) %}{% endif %}
+      {% endfor %}
+      {% for item in high_items[:3] %}
+      <div class="monday-item">
+        <div class="monday-num">{{ loop.index }}</div>
+        <div class="monday-text">
+          <strong>{{ item.title }}</strong> — {{ item.description[:120] }}{% if item.description | length > 120 %}…{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- ── Footer ────────────────────────────────────────────────────── -->
+  <div class="footer">
+    <div class="footer-left">
+      GEO Auditor · Checks: AI Bot Access, JSON-LD Schema, Content Structure, Live Citation Share<br/>
+      Score is deterministic and fully explained above. AI narrative powered by Groq llama-3.3-70b.
+    </div>
+    <div class="footer-right">
+      <a href="/">← Run another audit</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  /* Copy-to-clipboard */
+  function copyCode(btn, codeId) {
+    const code = document.getElementById(codeId);
+    if (!code) return;
+    navigator.clipboard.writeText(code.innerText).then(() => {
+      btn.textContent = 'Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+    });
+  }
+
+  /* Animate score ring on load */
+  document.addEventListener('DOMContentLoaded', () => {
+    const ring = document.getElementById('ring-fill');
+    if (ring) {
+      const wrap = document.getElementById('score-ring');
+      const score = parseInt(wrap?.dataset.score || '0');
+      const circ = parseInt(wrap?.dataset.circumference || '345');
+      const target = circ - Math.round((score / 100) * circ);
+      ring.style.strokeDashoffset = circ; // start at 0
+      requestAnimationFrame(() => {
+        ring.style.transition = 'stroke-dashoffset 1.4s cubic-bezier(.4,0,.2,1)';
+        ring.style.strokeDashoffset = target;
+      });
+    }
+  });
+</script>
+</body>
+</html>

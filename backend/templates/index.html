@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GEO Auditor — Check Your AI Search Visibility</title>
+  <meta name="description" content="Find out if your business is visible in AI-powered search engines like ChatGPT, Perplexity, and Google AI Overviews. Free instant audit." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #080c14;
+      --surface: #0e1521;
+      --border:  #1e2d45;
+      --text:    #e8edf5;
+      --muted:   #6b7f99;
+      --accent:  #4f8ef7;
+      --accent2: #7c3aed;
+      --green:   #10d47e;
+      --radius:  16px;
+    }
+
+    html, body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Background glow ──────────────────────────────────────────── */
+    .bg-glow {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(ellipse 700px 500px at 20% 30%, rgba(79,142,247,.06) 0%, transparent 70%),
+        radial-gradient(ellipse 500px 400px at 80% 70%, rgba(124,58,237,.05) 0%, transparent 70%);
+    }
+
+    /* ── Main layout ──────────────────────────────────────────────── */
+    .page {
+      position: relative; z-index: 1;
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 48px 24px;
+    }
+
+    /* ── Header pill ──────────────────────────────────────────────── */
+    .header-pill {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 999px;
+      background: rgba(79,142,247,.1); color: var(--accent);
+      border: 1px solid rgba(79,142,247,.25); margin-bottom: 28px;
+    }
+    .pill-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); animation: blink 2s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    /* ── Hero text ────────────────────────────────────────────────── */
+    .hero-title {
+      font-size: clamp(32px, 6vw, 56px); font-weight: 900;
+      line-height: 1.1; text-align: center; max-width: 680px;
+      letter-spacing: -1.5px; margin-bottom: 20px;
+    }
+    .hero-title .grad {
+      background: linear-gradient(90deg, var(--accent) 0%, var(--accent2) 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+    .hero-subtitle {
+      font-size: 17px; color: var(--muted); text-align: center; max-width: 520px;
+      line-height: 1.6; margin-bottom: 44px; font-weight: 400;
+    }
+    .hero-subtitle strong { color: #9ab0cc; }
+
+    /* ── Audit form card ──────────────────────────────────────────── */
+    .card {
+      width: 100%; max-width: 580px;
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 36px 40px; position: relative; overflow: hidden;
+    }
+    .card::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+
+    .form-label {
+      font-size: 12px; font-weight: 600; letter-spacing: .6px; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 10px; display: block;
+    }
+    .input-wrap { display: flex; gap: 10px; }
+    .url-input {
+      flex: 1; background: #04080f; border: 1px solid var(--border); border-radius: 10px;
+      padding: 14px 18px; font-size: 15px; color: var(--text);
+      font-family: inherit; outline: none; transition: border-color .2s, box-shadow .2s;
+    }
+    .url-input::placeholder { color: var(--muted); }
+    .url-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(79,142,247,.12); }
+
+    .audit-btn {
+      display: flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      color: #fff; font-family: inherit; font-size: 14px; font-weight: 700;
+      padding: 14px 24px; border: none; border-radius: 10px; cursor: pointer;
+      transition: opacity .2s, transform .15s; white-space: nowrap;
+    }
+    .audit-btn:hover { opacity: .9; transform: translateY(-1px); }
+    .audit-btn:active { transform: translateY(0); }
+    .audit-btn:disabled { opacity: .5; cursor: not-allowed; transform: none; }
+
+    /* ── Loading state ────────────────────────────────────────────── */
+    .loading-overlay {
+      display: none; flex-direction: column; align-items: center;
+      gap: 16px; padding: 20px 0 0;
+    }
+    .loading-overlay.active { display: flex; }
+    .spinner {
+      width: 32px; height: 32px; border: 3px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-steps { display: flex; flex-direction: column; gap: 6px; width: 100%; max-width: 360px; }
+    .loading-step { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 10px; }
+    .loading-step.active { color: var(--text); }
+    .loading-step.done { color: var(--green); }
+    .step-icon { font-size: 14px; width: 20px; text-align: center; }
+
+    /* ── Error message ────────────────────────────────────────────── */
+    .error-msg {
+      display: none; background: rgba(239,68,68,.08); border: 1px solid rgba(239,68,68,.25);
+      border-radius: 8px; padding: 12px 16px; font-size: 13px; color: #fca5a5; margin-top: 14px;
+    }
+    .error-msg.active { display: block; }
+
+    /* ── What we check list ───────────────────────────────────────── */
+    .checks-list {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+      margin-top: 28px; padding-top: 24px; border-top: 1px solid var(--border);
+    }
+    .check-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+    .check-icon { font-size: 15px; }
+
+    /* ── Trust badges ─────────────────────────────────────────────── */
+    .trust-row {
+      display: flex; align-items: center; gap: 24px; margin-top: 40px; flex-wrap: wrap; justify-content: center;
+    }
+    .trust-item { font-size: 12px; color: #4a6080; display: flex; align-items: center; gap: 6px; }
+    .trust-item span { font-size: 15px; }
+  </style>
+</head>
+<body>
+
+<div class="bg-glow"></div>
+
+<main class="page" id="main">
+  <!-- Pill -->
+  <div class="header-pill">
+    <span class="pill-dot"></span>
+    Generative Engine Optimization
+  </div>
+
+  <!-- Hero -->
+  <h1 class="hero-title">
+    Is your business<br /><span class="grad">invisible to AI search?</span>
+  </h1>
+  <p class="hero-subtitle">
+    Most businesses rank on Google but get <strong>zero mentions</strong> in ChatGPT,
+    Perplexity, and Google AI Overviews. Find out where you stand — in seconds.
+  </p>
+
+  <!-- Card -->
+  <div class="card">
+    <form id="audit-form" action="/report" method="GET">
+      <label class="form-label" for="url-input">Your website URL</label>
+      <div class="input-wrap">
+        <input
+          id="url-input"
+          name="url"
+          type="text"
+          class="url-input"
+          placeholder="https://yoursite.com"
+          autocomplete="off"
+          autocapitalize="off"
+          spellcheck="false"
+          required
+        />
+        <button type="submit" class="audit-btn" id="audit-btn">
+          <span id="btn-label">Audit →</span>
+        </button>
+      </div>
+      <div class="error-msg" id="error-msg">
+        Could not start audit. Please check the URL and try again.
+      </div>
+    </form>
+
+    <!-- Loading progress -->
+    <div class="loading-overlay" id="loading-overlay">
+      <div class="spinner"></div>
+      <div class="loading-steps">
+        <div class="loading-step" id="step-1"><span class="step-icon">🌐</span> Crawling your site…</div>
+        <div class="loading-step" id="step-2"><span class="step-icon">🤖</span> Checking AI bot access…</div>
+        <div class="loading-step" id="step-3"><span class="step-icon">📐</span> Analysing structured schema…</div>
+        <div class="loading-step" id="step-4"><span class="step-icon">🔍</span> Testing live AI citation share…</div>
+        <div class="loading-step" id="step-5"><span class="step-icon">✦</span> Generating AI insights…</div>
+      </div>
+    </div>
+
+    <!-- What we check -->
+    <div class="checks-list">
+      <div class="check-item"><span class="check-icon">🤖</span> AI bot crawlability</div>
+      <div class="check-item"><span class="check-icon">📄</span> JSON-LD schema markup</div>
+      <div class="check-item"><span class="check-icon">📊</span> Content answer density</div>
+      <div class="check-item"><span class="check-icon">🔗</span> Live citation presence</div>
+    </div>
+  </div>
+
+  <!-- Trust -->
+  <div class="trust-row">
+    <div class="trust-item"><span>✓</span> No signup required</div>
+    <div class="trust-item"><span>✓</span> Real checks, not templates</div>
+    <div class="trust-item"><span>✦</span> Powered by Groq AI</div>
+  </div>
+</main>
+
+<script>
+  const form = document.getElementById('audit-form');
+  const btn  = document.getElementById('audit-btn');
+  const overlay = document.getElementById('loading-overlay');
+  const errMsg  = document.getElementById('error-msg');
+  const steps = [1,2,3,4,5].map(i => document.getElementById('step-' + i));
+
+  form.addEventListener('submit', (e) => {
+    // Show loading UI — the browser will navigate naturally via GET
+    btn.disabled = true;
+    document.getElementById('btn-label').textContent = 'Auditing…';
+    overlay.classList.add('active');
+    errMsg.classList.remove('active');
+
+    // Animate loading steps
+    steps.forEach((s, idx) => {
+      setTimeout(() => {
+        steps.forEach(st => st.classList.remove('active'));
+        s.classList.add('active');
+        if (idx > 0) steps[idx - 1].classList.add('done');
+      }, idx * 1800);
+    });
+  });
+</script>
+</body>
+</html>
