@@ -109,7 +109,7 @@ export default function ReportView({ report, onReset }) {
                 AI Executive Summary
               </span>
               <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">
-                ✦ Groq · llama-3.3-70b
+                ✦ Groq AI
               </span>
             </div>
             <p className="text-[15px] leading-relaxed text-slate-800 font-medium">{report.ai_narrative}</p>
